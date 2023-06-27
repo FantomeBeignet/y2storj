@@ -93,6 +93,7 @@ func DownloadAndStore(url, location, grant, quality string) error {
 
 	// set metadata from youtube
 	upload.SetCustomMetadata(context.Background(), uplink.CustomMetadata{
+		"URL":           result.Info.URL,
 		"OriginalTitle": result.Info.Title,
 		"Author":        result.Info.Creator,
 		"UploadDate":    result.Info.ReleaseDate,

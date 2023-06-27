@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -23,6 +24,13 @@ var rootCmd = &cobra.Command{
 You will need an access grant to the Storj project where you wish to store the video.`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
+		err := y2storj.DownloadAndStore(
+			args[0],
+			args[1],
+			config.Storj.AccessGrant,
+			config.Video.Quality,
+		)
+		cobra.CheckErr(err)
 	},
 }
 
@@ -44,7 +52,11 @@ func initConfig() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
-	viper.AddConfigPath("$XDG_CONFIG_HOME/y2storj")
+	home, err := homedir.Dir()
+	if err != nil {
+		panic(fmt.Errorf("failed to get home dir: %s", err))
+	}
+	viper.AddConfigPath(home + ".config/y2storj")
 	viper.BindPFlags(rootCmd.Flags())
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

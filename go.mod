@@ -3,22 +3,18 @@ module github.com/FantomeBeignet/y2storj
 go 1.20
 
 require (
-	github.com/kkdai/youtube/v2 v2.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/vbauerster/mpb v3.4.0+incompatible
+	github.com/wader/goutubedl v0.0.0-20230622161522-3d23796f5fe5
 	storj.io/uplink v1.10.0
 )
 
 require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/calebcase/tmpfile v1.0.3 // indirect
-	github.com/dlclark/regexp2 v1.9.0 // indirect
-	github.com/dop251/goja v0.0.0-20230402114112-623f9dda9079 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/pprof v0.0.0-20230406165453-00490a63f317 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -43,6 +39,7 @@ require (
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	storj.io/common v0.0.0-20221123115229-fed3e6651b63 // indirect

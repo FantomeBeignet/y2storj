@@ -5,11 +5,10 @@ import (
 	"errors"
 	"io"
 	"strings"
-	"time"
 
-	"github.com/kkdai/youtube/v2"
 	"github.com/vbauerster/mpb"
 	"github.com/vbauerster/mpb/decor"
+	"github.com/wader/goutubedl"
 	"storj.io/uplink"
 )
 
@@ -57,19 +56,17 @@ func validateRemoteLocation(loc string) (*Location, error) {
 }
 
 func DownloadAndStore(url, location, grant, quality string) error {
-	client := youtube.Client{}
-	// get the youtube video from the url
-	video, err := client.GetVideo(url)
+	goutubedl.Path = "yt-dlp"
+	result, err := goutubedl.New(
+		context.Background(),
+		url,
+		goutubedl.Options{},
+	)
 	if err != nil {
 		return err
 	}
-	// get the requested quality
-	formats := video.Formats.FindByQuality(quality)
-	// get the byte stream
-	stream, size, err := client.GetStream(video, formats)
-	if err != nil {
-		return err
-	}
+	downloadResult, err := result.Download(context.Background(), quality)
+	defer downloadResult.Close()
 	// check storj location is valid
 	loc, err := validateRemoteLocation(location)
 	if err != nil {
@@ -96,14 +93,14 @@ func DownloadAndStore(url, location, grant, quality string) error {
 
 	// set metadata from youtube
 	upload.SetCustomMetadata(context.Background(), uplink.CustomMetadata{
-		"OriginalTitle": video.Title,
-		"Author":        video.Author,
-		"UploadDate":    video.PublishDate.Format(time.DateOnly),
+		"OriginalTitle": result.Info.Title,
+		"Author":        result.Info.Creator,
+		"UploadDate":    result.Info.ReleaseDate,
 	})
 
 	// progress bar shenanigans
 	prog := &progress{
-		contentLength: float64(size),
+		contentLength: float64(result.Info.Filesize),
 	}
 	progress := mpb.New(mpb.WithWidth(64))
 	bar := progress.AddBar(
@@ -121,7 +118,7 @@ func DownloadAndStore(url, location, grant, quality string) error {
 	)
 
 	// more progress bar shenanigans
-	reader := bar.ProxyReader(stream)
+	reader := bar.ProxyReader(downloadResult)
 	mw := io.MultiWriter(upload, prog)
 	_, err = io.Copy(mw, reader)
 	if err != nil {

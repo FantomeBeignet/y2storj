@@ -1,4 +1,4 @@
-package internal
+package y2storj
 
 type Config struct {
 	Storj struct {

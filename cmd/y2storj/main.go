@@ -2,7 +2,7 @@
 Copyright © 2023 Tom Béné <himself@fantomebeig.net>
 */
 
-package cmd
+package main
 
 import (
 	"fmt"
@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/FantomeBeignet/y2storj/internal"
+	"github.com/FantomeBeignet/y2storj"
 )
 
-var config internal.Config
+var config y2storj.Config
 
 var rootCmd = &cobra.Command{
 	Use:   "y2storj [flags] video destination",
@@ -26,7 +26,7 @@ You will need an access grant to the Storj project where you wish to store the v
 	},
 }
 
-func Execute() {
+func main() {
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

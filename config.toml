@@ -1,0 +1,5 @@
+[storj]
+access_grant = "grant"
+
+[video]
+quality = "best"

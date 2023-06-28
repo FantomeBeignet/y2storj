@@ -6,8 +6,8 @@ import (
 	"io"
 	"strings"
 
-	"github.com/vbauerster/mpb"
-	"github.com/vbauerster/mpb/decor"
+	"github.com/vbauerster/mpb/v8"
+	"github.com/vbauerster/mpb/v8/decor"
 	"github.com/wader/goutubedl"
 	"storj.io/uplink"
 )
@@ -15,22 +15,6 @@ import (
 type Location struct {
 	bucket string
 	key    string
-}
-
-type progress struct {
-	contentLength     float64
-	totalWrittenBytes float64
-	downloadLevel     float64
-}
-
-func (dl *progress) Write(p []byte) (n int, err error) {
-	n = len(p)
-	dl.totalWrittenBytes = dl.totalWrittenBytes + float64(n)
-	currentPercent := (dl.totalWrittenBytes / dl.contentLength) * 100
-	if (dl.downloadLevel <= currentPercent) && (dl.downloadLevel < 100) {
-		dl.downloadLevel++
-	}
-	return
 }
 
 func validateRemoteLocation(loc string) (*Location, error) {
@@ -100,28 +84,36 @@ func DownloadAndStore(url, location, grant, quality string) error {
 	})
 
 	// progress bar shenanigans
-	prog := &progress{
-		contentLength: float64(result.Info.Filesize),
-	}
-	progress := mpb.New(mpb.WithWidth(64))
-	bar := progress.AddBar(
-		int64(prog.contentLength),
-
-		mpb.PrependDecorators(
-			decor.CountersKibiByte("% .2f / % .2f"),
-			decor.Percentage(decor.WCSyncSpace),
-		),
+	progress := mpb.New(
+		mpb.WithWidth(10),
+	)
+	s := mpb.SpinnerStyle(
+		"( ●    )",
+		"(  ●   )",
+		"(   ●  )",
+		"(    ● )",
+		"(     ●)",
+		"(    ● )",
+		"(   ●  )",
+		"(  ●   )",
+		"( ●    )",
+		"(●     )",
+	)
+	bar := progress.New(
+		int64(0),
+		s,
+		mpb.BarRemoveOnComplete(),
 		mpb.AppendDecorators(
-			decor.EwmaETA(decor.ET_STYLE_GO, 90),
+			decor.CurrentKibiByte("% .2f"),
 			decor.Name(" | "),
-			decor.EwmaSpeed(decor.UnitKiB, "% .2f", 60),
+			decor.Elapsed(decor.ET_STYLE_GO),
 		),
 	)
+	bar.EnableTriggerComplete()
 
 	// more progress bar shenanigans
-	reader := bar.ProxyReader(downloadResult)
-	mw := io.MultiWriter(upload, prog)
-	_, err = io.Copy(mw, reader)
+	writer := bar.ProxyWriter(upload)
+	_, err = io.Copy(writer, downloadResult)
 	if err != nil {
 		return nil
 	}
@@ -129,5 +121,6 @@ func DownloadAndStore(url, location, grant, quality string) error {
 	if err := upload.Commit(); err != nil {
 		return err
 	}
+	bar.SetTotal(-1, true)
 	return nil
 }

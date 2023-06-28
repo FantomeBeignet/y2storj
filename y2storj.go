@@ -3,6 +3,7 @@ package y2storj
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 
@@ -79,8 +80,15 @@ func DownloadAndStore(url, location, grant, quality string) error {
 	upload.SetCustomMetadata(context.Background(), uplink.CustomMetadata{
 		"URL":           result.Info.URL,
 		"OriginalTitle": result.Info.Title,
-		"Author":        result.Info.Creator,
+		"AltTitle":      result.Info.AltTitle,
+		"Channel":       result.Info.Channel,
 		"UploadDate":    result.Info.ReleaseDate,
+		"Duration":      fmt.Sprintf("%g", result.Info.Duration),
+		"Resolution":    result.Info.Resolution,
+		"FPS":           fmt.Sprintf("%g", result.Info.FPS),
+		"Container":     result.Info.Container,
+		"ACodec":        result.Info.ACodec,
+		"VCodec":        result.Info.VCodec,
 	})
 
 	// progress bar shenanigans

@@ -44,8 +44,8 @@ func main() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.Flags().
-		String("storj.access-grant", "", "The access grant to your Storj project")
-	rootCmd.Flags().String("video.quality", "", "The quality with which to download the video")
+		String("access-grant", "", "The access grant to your Storj project")
+	rootCmd.Flags().StringP("quality", "q", "", "The quality with which to download the video")
 }
 
 func initConfig() {
@@ -57,7 +57,9 @@ func initConfig() {
 		panic(fmt.Errorf("failed to get home dir: %s", err))
 	}
 	viper.AddConfigPath(home + ".config/y2storj")
-	viper.BindPFlags(rootCmd.Flags())
+	viper.SetDefault("video.quality", "best")
+	viper.BindPFlag("storj.access_grant", rootCmd.Flags().Lookup("access-grant"))
+	viper.BindPFlag("video.quality", rootCmd.Flags().Lookup("quality"))
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			return
